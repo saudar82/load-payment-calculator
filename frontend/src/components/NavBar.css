@@ -17,6 +17,6 @@
 .navbar li {
   list-style: none;
   display: inline-block;
-
-  margin: auto;
+  margin-right: 30px;
+  /* margin: auto; */
 }

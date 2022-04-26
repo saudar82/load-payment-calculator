@@ -7,6 +7,8 @@ const initQuotes = initQuotesStr ? JSON.parse(initQuotesStr) : [];
 
 const defaultState: QuotesContextInterface = {
   quotes: initQuotes,
+  isLoading: false,
+  errorMessage: "",
   saveQuote: (data: QuoteRequestInterface) => Promise.resolve(undefined),
 };
 
@@ -20,10 +22,13 @@ const QuotesProvider: React.FC<PropsWithChildren<ProviderProps>> = ({
   children,
 }) => {
   const [quotes, setQuotes] = useState(initQuotes);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const saveQuote = async (
     data: QuoteRequestInterface
   ): Promise<void | undefined> => {
+    setIsLoading(true);
     await fetch("/api/payment/calculate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -32,14 +37,21 @@ const QuotesProvider: React.FC<PropsWithChildren<ProviderProps>> = ({
       .then((response) => {
         if (response.ok) {
           return response.json();
+        } else {
+          throw new Error("API error!");
         }
       })
       .then((respData) => {
         const newQuotes = quotes.concat({ ...data, ...respData });
         sessionStorage.setItem("quotes", JSON.stringify(newQuotes));
         setQuotes(newQuotes);
+        setIsLoading(false);
+        setErrorMessage("");
       })
-      .catch(() => {});
+      .catch((e) => {
+        setErrorMessage(e.message ? e.message : e);
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -47,6 +59,8 @@ const QuotesProvider: React.FC<PropsWithChildren<ProviderProps>> = ({
       value={{
         quotes,
         saveQuote,
+        isLoading,
+        errorMessage,
       }}
     >
       {children}

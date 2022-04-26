@@ -10,14 +10,12 @@ function App() {
   return (
     <div className="App">
       <QuotesProvider>
-        <>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<LoanCalculatePage />} />
-            <Route path="/results" element={<QuotesResultPage />} />
-            <Route path="/thanks" element={<ThankYouPage />} />
-          </Routes>
-        </>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<LoanCalculatePage />} />
+          <Route path="/results" element={<QuotesResultPage />} />
+          <Route path="/thanks" element={<ThankYouPage />} />
+        </Routes>
       </QuotesProvider>
     </div>
   );

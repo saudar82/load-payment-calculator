@@ -23,20 +23,22 @@ const LoanFormSchema = Yup.object().shape({
 });
 
 const LoanCalculateForm: React.FC = () => {
-  const { saveQuote } = useContext(QuotesContext);
+  const { saveQuote, isLoading, errorMessage } = useContext(QuotesContext);
   const [approxQuote, setApproxQuote] = useState<number>(0);
   const [formData, setFormData] =
     useState<QuoteRequestInterface>(initialValues);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const navigate = useNavigate();
 
   const onSubmit = (values: QuoteRequestInterface) => {
     saveQuote(values);
-    if (formData.loanAmount > 1000000) {
-      navigate("/thanks");
-    } else {
-      navigate("/results");
-    }
+    setFormSubmitted(true);
+    // if (formData.loanAmount > 1000000) {
+    //   navigate("/thanks");
+    // } else {
+    //   navigate("/results");
+    // }
   };
 
   const calculateQuote = useCallback(() => {
@@ -58,62 +60,84 @@ const LoanCalculateForm: React.FC = () => {
     calculateQuote();
   }, [formData, calculateQuote]);
 
+  useEffect(() => {
+    if (formSubmitted && !isLoading && !errorMessage) {
+      if (formData.loanAmount > 1000000) {
+        navigate("/thanks");
+      } else {
+        navigate("/results");
+      }
+    }
+  }, [formSubmitted, isLoading, errorMessage]);
+
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={onSubmit}
-      validationSchema={LoanFormSchema}
-    >
-      <Form onChange={handleOnChange}>
-        <div className="form-field">
-          <div className="form-control">
-            <label htmlFor="term">Term (in months)</label>
-            <Field id="term" type="number" name="term" placeholder="months" />
-          </div>
-          <ErrorMessage name="term" component="p" />
-        </div>
-        <div className="form-field">
-          <div className="form-control">
-            <label htmlFor="loanAmount">Loan Amount</label>
-            <Field
-              id="loanAmount"
-              type="number"
-              name="loanAmount"
-              placeholder="$"
+    <>
+      <Formik
+        initialValues={initialValues}
+        onSubmit={onSubmit}
+        validationSchema={LoanFormSchema}
+      >
+        <Form onChange={handleOnChange} data-testid="loan-calculate-form">
+          <div className="form-field">
+            <div className="form-control">
+              <label htmlFor="term">Term (in months)</label>
+              <Field id="term" type="number" name="term" placeholder="months" />
+            </div>
+            <ErrorMessage
+              name="term"
+              component="p"
+              data-testid="term-error-message"
             />
           </div>
-          <ErrorMessage name="loanAmount" component="p" />
-        </div>
-        <div className="form-field">
-          <div className="form-control">
-            <label htmlFor="interestRate">Interest Rate</label>
-            <Field
-              id="interestRate"
-              type="number"
-              name="interestRate"
-              placeholder="Annual %"
-            />
+          <div className="form-field">
+            <div className="form-control">
+              <label htmlFor="loanAmount">Loan Amount</label>
+              <Field
+                id="loanAmount"
+                type="number"
+                name="loanAmount"
+                placeholder="$"
+              />
+            </div>
+            <ErrorMessage name="loanAmount" component="p" />
           </div>
-          <ErrorMessage name="interestRate" component="p" />
-        </div>
-        <div className="form-field">
-          <div className="form-control">
-            <label htmlFor="residualValue">Residual Value</label>
-            <Field
-              id="residualValue"
-              type="number"
-              name="residualValue"
-              placeholder="$"
-            />
+          <div className="form-field">
+            <div className="form-control">
+              <label htmlFor="interestRate">Interest Rate</label>
+              <Field
+                id="interestRate"
+                type="number"
+                name="interestRate"
+                placeholder="Annual %"
+              />
+            </div>
+            <ErrorMessage name="interestRate" component="p" />
           </div>
-          <ErrorMessage name="residualValue" component="p" />
-        </div>
-        <div className="action-bar">
-          <div className="approx">Approx. Quote: {approxQuote}</div>
-          <button type="submit">Save Quote</button>
-        </div>
-      </Form>
-    </Formik>
+          <div className="form-field">
+            <div className="form-control">
+              <label htmlFor="residualValue">Residual Value</label>
+              <Field
+                id="residualValue"
+                type="number"
+                name="residualValue"
+                placeholder="$"
+              />
+            </div>
+            <ErrorMessage name="residualValue" component="p" />
+          </div>
+          <div className="action-bar">
+            <div className="approx" data-testid="approx-label">
+              Approx. Quote: {approxQuote}
+            </div>
+            <button type="submit">Save Quote</button>
+          </div>
+        </Form>
+      </Formik>
+      <div className="api-status">
+        {isLoading && <div>Loading...</div>}
+        {errorMessage && <div className="error">{errorMessage}</div>}
+      </div>
+    </>
   );
 };
 

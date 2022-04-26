@@ -22,13 +22,14 @@ class LoanPaymentServiceTest {
 
     @Test
     void Should_calulate_payment_when_inputs_are_valid() {
+        BigDecimal expected = new BigDecimal("5400.00");
         LoanPaymentRequest paymentRequest = LoanPaymentRequest.builder()
                 .loanAmount(LOAN_AMOUNT)
                 .residualValue(RESIDUAL_VALUE)
                 .term(TERM)
                 .interestRate(INTEREST_RATE)
                 .build();
-        BigDecimal result =  loanService.calculateLoanPayment(paymentRequest);
-        assertEquals(result, new BigDecimal("5400.00"));
+        BigDecimal actual =  loanService.calculateLoanPayment(paymentRequest);
+        assertEquals(actual, expected);
     }
 }
